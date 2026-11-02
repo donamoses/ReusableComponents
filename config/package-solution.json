@@ -1,0 +1,39 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "reusable-components-client-side-solution",
+    "id": "2c4aa3ab-78e8-4da5-8ccf-c81e8c40fa3f",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.24.0"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "reusable-components description"
+      },
+      "longDescription": {
+        "default": "reusable-components description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "reusable-components Feature",
+        "description": "The feature that activates elements of the reusable-components solution.",
+        "id": "cd4a74b3-d2ad-41b5-b7cc-4be5e4589846",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/reusable-components.sppkg"
+  }
+}

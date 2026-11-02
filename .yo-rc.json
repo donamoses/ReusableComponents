@@ -1,0 +1,18 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "useGulp": false,
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "18.20.3",
+    "sdksVersions": {},
+    "version": "1.24.0",
+    "libraryName": "reusable-components",
+    "libraryId": "2c4aa3ab-78e8-4da5-8ccf-c81e8c40fa3f",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "reusable-components",
+    "solutionShortDescription": "reusable-components description",
+    "skipFeatureDeployment": true,
+    "componentType": "webpart"
+  }
+}
