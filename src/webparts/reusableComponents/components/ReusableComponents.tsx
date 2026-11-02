@@ -1,12 +1,12 @@
 import * as React from 'react';
-import styles from './UploadDocuments.module.scss';
-import type { IUploadDocumentsProps } from './IUploadDocumentsProps';
+import styles from './ReusableComponents.module.scss';
+import type { IReusableComponentsProps } from './IReusableComponentsProps';
 import { escape } from '@microsoft/sp-lodash-subset';
 import welcomeDark from '../assets/welcome-dark.png';
 import welcomeLight from '../assets/welcome-light.png';
 
-export default class UploadDocuments extends React.Component<IUploadDocumentsProps> {
-  public render(): React.ReactElement<IUploadDocumentsProps> {
+export default class ReusableComponents extends React.Component<IReusableComponentsProps> {
+  public render(): React.ReactElement<IReusableComponentsProps> {
     const {
       description,
       isDarkTheme,
@@ -15,7 +15,7 @@ export default class UploadDocuments extends React.Component<IUploadDocumentsPro
     } = this.props;
 
     return (
-      <section className={`${styles.uploadDocuments}`}>
+      <section className={`${styles.reusableComponents}`}>
         <div className={styles.welcome}>
           <img alt="" src={isDarkTheme ? welcomeDark : welcomeLight} className={styles.welcomeImage} />
           <h2>Well done, {escape(userDisplayName)}!</h2>

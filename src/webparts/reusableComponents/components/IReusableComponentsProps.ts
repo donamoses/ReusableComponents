@@ -1,4 +1,4 @@
-export interface IUploadDocumentsProps {
+export interface IReusableComponentsProps {
   description: string;
   isDarkTheme: boolean;
   environmentMessage: string;
