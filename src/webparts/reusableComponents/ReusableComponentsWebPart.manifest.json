@@ -22,7 +22,7 @@
     "description": { "default": "Reusable Components description" },
     "officeFabricIconFontName": "Page",
     "properties": {
-      "description": "Reusable Components"
+      "WebpartTitle": "Reusable Components"
     }
   }]
 }

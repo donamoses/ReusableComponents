@@ -1,44 +1,76 @@
 import * as React from 'react';
 import styles from './ReusableComponents.module.scss';
-import type { IReusableComponentsProps } from './IReusableComponentsProps';
-import { escape } from '@microsoft/sp-lodash-subset';
-import welcomeDark from '../assets/welcome-dark.png';
-import welcomeLight from '../assets/welcome-light.png';
+import type { IReusableComponentsProps } from '../interfaces/IReusableComponentsProps';
+import { TextField } from '@fluentui/react';
+
 
 export default class ReusableComponents extends React.Component<IReusableComponentsProps> {
   public render(): React.ReactElement<IReusableComponentsProps> {
-    const {
-      description,
-      isDarkTheme,
-      environmentMessage,
-      userDisplayName
-    } = this.props;
+    
 
     return (
-      <section className={`${styles.reusableComponents}`}>
-        <div className={styles.welcome}>
-          <img alt="" src={isDarkTheme ? welcomeDark : welcomeLight} className={styles.welcomeImage} />
-          <h2>Well done, {escape(userDisplayName)}!</h2>
-          <div>{environmentMessage}</div>
-          <div>Web part property value: <strong>{escape(description)}</strong></div>
-        </div>
-        <div>
-          <h3>Welcome to SharePoint Framework!</h3>
-          <p>
-            The SharePoint Framework (SPFx) is a extensibility model for Microsoft Viva, Microsoft Teams and SharePoint. It&#39;s the easiest way to extend Microsoft 365 with automatic Single Sign On, automatic hosting and industry standard tooling.
-          </p>
-          <h4>Learn more about SPFx development:</h4>
-          <ul className={styles.links}>
-            <li><a href="https://aka.ms/spfx" target="_blank" rel="noreferrer">SharePoint Framework Overview</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-graph" target="_blank" rel="noreferrer">Use Microsoft Graph in your solution</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-teams" target="_blank" rel="noreferrer">Build for Microsoft Teams using SharePoint Framework</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-viva" target="_blank" rel="noreferrer">Build for Microsoft Viva Connections using SharePoint Framework</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-store" target="_blank" rel="noreferrer">Publish SharePoint Framework applications to the marketplace</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-api" target="_blank" rel="noreferrer">SharePoint Framework API reference</a></li>
-            <li><a href="https://aka.ms/m365pnp" target="_blank" rel="noreferrer">Microsoft 365 Developer Community</a></li>
-          </ul>
+      <section className={`${styles.container}`}>
+        <div className={styles.formpopup}>
+          <div className={styles.formheader}>
+            <div className={styles.formtitle}>{this.props.wpproperties.WebpartTitle}</div>
+          </div>
+          <div className={styles.formbody}>
+            {/* One Column */}
+            <div className={styles.row}>
+              <div className={styles.col12}>
+                <TextField label="Column 1"  />
+              </div>
+            </div>
+           {/* 3/4 column + 1/4 column */}
+            <div className={styles.row}>
+              <div className={styles.col8}>
+                <TextField label="Column 1" value=""/>
+              </div>
+              <div className={styles.col4}>
+                <TextField label="Column 2" value=""/>
+              </div>
+            </div>
+            {/* 2 columns */}
+            <div className={styles.row}>
+              <div className={styles.col6}>
+                <TextField label="Column 1" value=""/>
+              </div>
+               <div className={styles.col6}>
+                <TextField label="Column 2" value=""/>
+              </div>
+            </div>
+            {/* 3 columns */}
+<div className={styles.row}>
+              <div className={styles.col4}>
+                <TextField label="Column 1" value=""/>
+              </div>
+              <div className={styles.col4}>
+                <TextField label="Column 2" value=""  />
+              </div>
+              <div className={styles.col4}>
+                <TextField label="Column 3" value=""/>
+              </div>
+            </div>
+            {/* 4 columns */}
+            <div className={styles.row}>
+              <div className={styles.col2}>
+                <TextField label="Column 1" value=""/>
+              </div>
+              <div className={styles.col2}>
+                <TextField label="Column 2" value=""  />
+              </div>
+              <div className={styles.col2}>
+                <TextField label="Column 3" value=""/>
+              </div>
+              <div className={styles.col2}>
+                <TextField label="Column 4" value=""/>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     );
   }
 }
+
+  

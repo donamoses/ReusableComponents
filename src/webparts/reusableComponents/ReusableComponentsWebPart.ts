@@ -10,10 +10,10 @@ import { IReadonlyTheme } from '@microsoft/sp-component-base';
 
 import * as strings from 'ReusableComponentsWebPartStrings';
 import ReusableComponents from './components/ReusableComponents';
-import { IReusableComponentsProps } from './components/IReusableComponentsProps';
+import { IReusableComponentsProps } from './interfaces/IReusableComponentsProps';
 
 export interface IReusableComponentsWebPartProps {
-  description: string;
+  WebpartTitle: string;
 }
 
 export default class ReusableComponentsWebPart extends BaseClientSideWebPart<IReusableComponentsWebPartProps> {
@@ -26,10 +26,8 @@ export default class ReusableComponentsWebPart extends BaseClientSideWebPart<IRe
     const element: React.ReactElement<IReusableComponentsProps> = React.createElement(
       ReusableComponents,
       {
-        description: this.properties.description,
-        isDarkTheme: this._isDarkTheme,
-        environmentMessage: this._environmentMessage,
-        userDisplayName: this.context.pageContext.user.displayName
+        context: this.context,
+        wpproperties: this.properties
       }
     );
 
@@ -113,8 +111,8 @@ export default class ReusableComponentsWebPart extends BaseClientSideWebPart<IRe
             {
               groupName: strings.BasicGroupName,
               groupFields: [
-                PropertyPaneTextField('description', {
-                  label: strings.DescriptionFieldLabel
+                PropertyPaneTextField('WebpartTitle', {
+                  label: strings.WebpartTitle
                 })
               ]
             }

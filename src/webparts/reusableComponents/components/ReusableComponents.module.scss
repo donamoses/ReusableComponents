@@ -4,26 +4,61 @@
   color: "[theme:bodyText, default: #323130]";
   color: var(--bodyText);
 }
-
-.welcome {
-  text-align: center;
+.container {
+  font-family: Arial, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-
-.welcomeImage {
+.formpopup {
   width: 100%;
-  max-width: 420px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+.formheader {
+  background: #112967;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24px;
+  position: relative;
 }
 
-.links {
-  a {
-    text-decoration: none;
-    color: "[theme:link, default:#03787c]";
-    color: var(--link); // note: CSS Custom Properties support is limited to modern browsers only
-
-    &:hover {
-      text-decoration: underline;
-      color: "[theme:linkHovered, default: #014446]";
-      color: var(--linkHovered); // note: CSS Custom Properties support is limited to modern browsers only
-    }
-  }
+.formtitle {
+  color: #fff;
+  font-size: 24px;
+}
+.formbody {
+  margin: 24px;
+}
+//Row
+.row {
+  display: flex;
+  margin-bottom: 16px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+//Single Column
+.col12 {
+  flex: 1 1 0%;
+}
+//3/4 column
+.col8 {
+  flex: 0 0 calc(66.666% - 7px);
+}
+//2 column
+.col6 {
+   flex: 0 0 calc(50% - 7px);
+}
+//3 column
+.col4 {
+  flex: 0 0 calc(33.333% - 7px);
+}
+//4 column
+.col2 {
+  flex: 1 1 calc(25% - 10px);
+  min-width: 0;
 }
