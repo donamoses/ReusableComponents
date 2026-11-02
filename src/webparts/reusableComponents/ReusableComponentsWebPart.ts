@@ -8,23 +8,23 @@ import {
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
 
-import * as strings from 'UploadDocumentsWebPartStrings';
-import UploadDocuments from './components/UploadDocuments';
-import { IUploadDocumentsProps } from './components/IUploadDocumentsProps';
+import * as strings from 'ReusableComponentsWebPartStrings';
+import ReusableComponents from './components/ReusableComponents';
+import { IReusableComponentsProps } from './components/IReusableComponentsProps';
 
-export interface IUploadDocumentsWebPartProps {
+export interface IReusableComponentsWebPartProps {
   description: string;
 }
 
-export default class UploadDocumentsWebPart extends BaseClientSideWebPart<IUploadDocumentsWebPartProps> {
+export default class ReusableComponentsWebPart extends BaseClientSideWebPart<IReusableComponentsWebPartProps> {
 
   private _isDarkTheme: boolean = false;
   private _environmentMessage: string = '';
   private _root: Root | undefined;
 
   public render(): void {
-    const element: React.ReactElement<IUploadDocumentsProps> = React.createElement(
-      UploadDocuments,
+    const element: React.ReactElement<IReusableComponentsProps> = React.createElement(
+      ReusableComponents,
       {
         description: this.properties.description,
         isDarkTheme: this._isDarkTheme,

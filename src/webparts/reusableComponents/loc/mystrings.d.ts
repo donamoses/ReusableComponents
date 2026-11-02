@@ -1,4 +1,4 @@
-declare interface IUploadDocumentsWebPartStrings {
+declare interface IReusableComponentsWebPartStrings {
   PropertyPaneDescription: string;
   BasicGroupName: string;
   DescriptionFieldLabel: string;
@@ -13,7 +13,7 @@ declare interface IUploadDocumentsWebPartStrings {
   UnknownEnvironment: string;
 }
 
-declare module 'UploadDocumentsWebPartStrings' {
-  const strings: IUploadDocumentsWebPartStrings;
+declare module 'ReusableComponentsWebPartStrings' {
+  const strings: IReusableComponentsWebPartStrings;
   export = strings;
 }

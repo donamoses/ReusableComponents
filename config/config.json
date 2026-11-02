@@ -2,17 +2,17 @@
   "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
   "version": "2.0",
   "bundles": {
-    "upload-documents-web-part": {
+    "reusable-components-web-part": {
       "components": [
         {
-          "entrypoint": "./lib/webparts/uploadDocuments/UploadDocumentsWebPart.js",
-          "manifest": "./src/webparts/uploadDocuments/UploadDocumentsWebPart.manifest.json"
+          "entrypoint": "./lib/webparts/reusableComponents/ReusableComponentsWebPart.js",
+          "manifest": "./src/webparts/reusableComponents/ReusableComponentsWebPart.manifest.json"
         }
       ]
     }
   },
   "externals": {},
   "localizedResources": {
-    "UploadDocumentsWebPartStrings": "lib/webparts/uploadDocuments/loc/{locale}.js"
+    "ReusableComponentsWebPartStrings": "lib/webparts/reusableComponents/loc/{locale}.js"
   }
 }
