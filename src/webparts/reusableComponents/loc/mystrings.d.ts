@@ -11,6 +11,9 @@ declare interface IReusableComponentsWebPartStrings {
   AppOfficeEnvironment: string;
   AppOutlookEnvironment: string;
   UnknownEnvironment: string;
+  DivStyle: string;
+  DivStyleOn: string;
+  DivStyleOff: string;
 }
 
 declare module 'ReusableComponentsWebPartStrings' {

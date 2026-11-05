@@ -3,18 +3,17 @@ import { createRoot, type Root } from 'react-dom/client';
 import { Version } from '@microsoft/sp-core-library';
 import {
   type IPropertyPaneConfiguration,
-  PropertyPaneTextField
+  PropertyPaneTextField,
+  PropertyPaneToggle
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
 
 import * as strings from 'ReusableComponentsWebPartStrings';
 import ReusableComponents from './components/ReusableComponents';
-import { IReusableComponentsProps } from './interfaces/IReusableComponentsProps';
+import { IReusableComponentsProps, IReusableComponentsWebPartProps } from './interfaces/IReusableComponentsProps';
 
-export interface IReusableComponentsWebPartProps {
-  WebpartTitle: string;
-}
+
 
 export default class ReusableComponentsWebPart extends BaseClientSideWebPart<IReusableComponentsWebPartProps> {
 
@@ -113,7 +112,14 @@ export default class ReusableComponentsWebPart extends BaseClientSideWebPart<IRe
               groupFields: [
                 PropertyPaneTextField('WebpartTitle', {
                   label: strings.WebpartTitle
+                }),
+                PropertyPaneToggle('divstyle', {
+                  label: strings.DivStyle,
+                  onText: strings.DivStyleOn,
+                  offText: strings.DivStyleOff
                 })
+
+                
               ]
             }
           ]

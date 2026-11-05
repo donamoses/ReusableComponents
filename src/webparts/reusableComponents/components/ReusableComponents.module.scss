@@ -62,3 +62,55 @@
   flex: 1 1 calc(25% - 10px);
   min-width: 0;
 }
+//Upload File
+.uploadDiv {
+  margin-left: 1em;
+}
+.doctable {
+  width: 100%;
+  max-height: 18rem;
+  overflow-y: scroll;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  /* Ensures borders don't overlap */
+}
+
+.tr {
+  border: 1px solid #ccc;
+  /* Adds border between rows */
+}
+
+.th {
+  border: 1px solid #ccc;
+  /* Adds border between columns */
+  padding: 8px;
+  /* Adds padding for better readability */
+  text-align: left;
+  /* Aligns text to the left */
+}
+
+.rgtalign {
+  margin-top: 5px;
+  width: 100%;
+  text-align: right;
+}
+
+.btn {
+  margin-right: 5px;
+  border-radius: 5px;
+  border: 1px solid gray;
+  margin-bottom: 5px;
+}
+@media (max-width: 1024px) {
+
+  .col4,
+  .col6 {
+    flex: 0 0 100%;
+  }
+}
+input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
