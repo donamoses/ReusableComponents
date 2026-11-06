@@ -22,7 +22,12 @@
     "description": { "default": "Reusable Components description" },
     "officeFabricIconFontName": "Page",
     "properties": {
-      "WebpartTitle": "Reusable Components"
+      "WebpartTitle": "Reusable Components",
+      "divstyle": "false",
+      "uploadfiles": "true",
+      "multidragdropfiles": "false",
+      "singledragdropfile": "false",
+      "griddragdropfile": "false"
     }
   }]
 }

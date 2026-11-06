@@ -14,6 +14,20 @@ declare interface IReusableComponentsWebPartStrings {
   DivStyle: string;
   DivStyleOn: string;
   DivStyleOff: string;
+  DragFileSelection: string;
+  BrowseFileSelection: string;
+  UploadFiles: string;
+  UploadFilesOn: string;
+  UploadFilesOff: string;
+  MultiDragDropFiles: string;
+  MultiDragDropFilesOn: string;
+  MultiDragDropFilesOff: string;
+  SingleDragDropFile: string;
+  SingleDragDropFileOn: string;
+  SingleDragDropFileOff: string;
+  GridDragDropFile: string;
+  GridDragDropFileOn: string;
+  GridDragDropFileOff: string;
 }
 
 declare module 'ReusableComponentsWebPartStrings' {

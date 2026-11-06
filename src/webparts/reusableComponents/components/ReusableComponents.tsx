@@ -1,8 +1,13 @@
 import * as React from 'react';
 import styles from './ReusableComponents.module.scss';
-import type { IReusableComponentsProps, IReusableComponentsState, IUploadedFile } from '../interfaces/IReusableComponentsProps';
+import type { IReusableComponentsProps, IReusableComponentsState, IUploadedFile, IGridDocumentRow } from '../interfaces/IReusableComponentsProps';
 import { DatePicker, Dropdown, IconButton, IDropdownOption, Link, PrimaryButton, TextField } from '@fluentui/react';
 import CustomFileInput from './CustomFileInput';
+import SingleDragDropFile from './SingleDragDropFile';
+import DragDropFile from './DragDropFile';
+import GridDragDropFile from './GridDragDropFile';
+import { IFilePickerResult } from '@pnp/spfx-controls-react/lib/FilePicker';
+import * as strings from 'ReusableComponentsWebPartStrings';
 import { ReusableComponentService, UPLOAD_SITE_URL } from '../services/ReusableComponentService';
 import ModalOverlay from '../../../shared/controls/Overlay/Overlay';
 import ToastService from '../../../shared/controls/Toast/Toast';
@@ -16,6 +21,7 @@ const PeoplePicker = PnPPeoplePicker as unknown as React.ComponentType<IPeoplePi
 export default class ReusableComponents extends React.Component<IReusableComponentsProps, IReusableComponentsState> {
   private service: ReusableComponentService;
   private peoplePickerContext: IPeoplePickerContext;
+  private nextGridRowId = 1;
   constructor(props: IReusableComponentsProps) {
     super(props);
     this.peoplePickerContext = {
@@ -32,6 +38,8 @@ export default class ReusableComponents extends React.Component<IReusableCompone
       },
       modaloverlay: { isOpen: false, modalText: "" },
       fileUploaded: [],
+      singleFile: undefined,
+      gridRows: [{ RowId: this.nextGridRowId++ }],
       departmentOptions: [],
       selectedDepartment: undefined,
       title: "",
@@ -80,7 +88,7 @@ export default class ReusableComponents extends React.Component<IReusableCompone
   // Characters SharePoint doesn't allow in file names are replaced with "_"
   private getDocumentName = (title: string, reusableId: number, documentType?: string): string => {
     const safeTitle = title.trim().replace(/["*:<>?/\\|#%~&{}]/g, "_").replace(/^\.+|\.+$/g, "");
-    const name = `${safeTitle}_${reusableId}`+ "_" + Date.now();
+    const name = `${safeTitle}_${reusableId}_${Date.now()}`;
     return documentType ? `${name}.${documentType}` : name;
   }
   // File name for each uploaded file; files after the first with the same name get a "_2", "_3"... suffix
@@ -105,8 +113,10 @@ export default class ReusableComponents extends React.Component<IReusableCompone
   }
   // Save: create the Reusable list item, then link every uploaded file in the ReusableUpload library to it
   private onSave = async (): Promise<void> => {
-    const { fileUploaded, title, selectedDepartment, dueDate, assignedTo } = this.state;
-    const linkedFiles = fileUploaded.filter(f => {
+    const { fileUploaded, singleFile, title, selectedDepartment, dueDate, assignedTo } = this.state;
+    const gridFiles = this.state.gridRows.filter(r => !!r.file).map(r => r.file as IUploadedFile);
+    const allFiles = [...fileUploaded, ...(singleFile ? [singleFile] : []), ...gridFiles];
+    const linkedFiles = allFiles.filter(f => {
       const id = Number(f.DocumentID);
       return !isNaN(id) && id > 0;
     });
@@ -165,6 +175,8 @@ export default class ReusableComponents extends React.Component<IReusableCompone
   private resetForm = (): void => {
     this.setState({
       fileUploaded: [],
+      singleFile: undefined,
+      gridRows: [{ RowId: this.nextGridRowId++ }],
       title: "",
       selectedDepartment: undefined,
       dueDate: undefined,
@@ -178,9 +190,29 @@ export default class ReusableComponents extends React.Component<IReusableCompone
     const mm = String(date.getMonth() + 1).padStart(2, "0");
     return `${dd}/${mm}/${date.getFullYear()}`;
   }
+  // Upload button: hand the selected files to addFiles
   public uploadFile = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    const files = event.target.files ? Array.prototype.slice.call(event.target.files) as File[] : [];
+    // Reset the input so the same file can be selected again after removal
+    event.target.value = '';
+    this.addFiles(files);
+  }
+  // Drag & drop control: dropped files arrive as File[], browsed files as IFilePickerResult[]
+  private onDragDropFiles = async (received: File[] | IFilePickerResult[], selectionType: string): Promise<void> => {
+    try {
+      const files: File[] = selectionType === strings.BrowseFileSelection
+        ? await Promise.all((received as IFilePickerResult[]).map(r => r.downloadFileContent()))
+        : received as File[];
+      this.addFiles(files);
+    } catch (err) {
+      console.error("Could not read the selected files", err);
+      ToastService.error("Could not read the selected files");
+    }
+  }
+  // Validate (skip duplicates and ZIP/audio/video), then upload to the library and add to the grid
+  private addFiles = (files: File[]): void => {
     const tempFile: IUploadedFile[] = [];
-    const files = event.target.files;
+    const skipped: string[] = [];
     if (files && files.length > 0) {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -188,16 +220,17 @@ export default class ReusableComponents extends React.Component<IReusableCompone
         const duplicate = this.state.fileUploaded.some(tempItem => tempItem.DocumentName === file.name);
         const duplicateFromList = this.state.fileUploaded.some(listItem => listItem.FileName === file.name);
         const duplicateInBatch = tempFile.some(tempItem => tempItem.DocumentName === file.name);
+        const duplicateSingle = this.state.singleFile?.DocumentName === file.name || this.isNameInGrid(file.name);
         const fileExtension = (file.name.split('.').pop() || '').toLowerCase();
         const isZipFile = fileExtension === 'zip';
         const isAudioFile = ['mp3', 'wav', 'ogg', 'aac'].indexOf(fileExtension) !== -1;
         const isVideoFile = ['mp4', 'avi', 'mkv', 'mov'].indexOf(fileExtension) !== -1;
         if (isZipFile || isAudioFile || isVideoFile) {
           // Ignore ZIP, audio, and video files
-          // Optionally, you can display an error message or handle these files differently
+          skipped.push(file.name);
           continue;
         }
-        if (!duplicate && !duplicateFromList && !duplicateInBatch) {
+        if (!duplicate && !duplicateFromList && !duplicateInBatch && !duplicateSingle) {
           tempFile.push({
             SlNo: this.state.fileUploaded.length + tempFile.length + 1,
             file: file,
@@ -207,13 +240,12 @@ export default class ReusableComponents extends React.Component<IReusableCompone
             UploadedBy: this.state.currentUser.title,
             UploadedOn: new Date().toLocaleDateString(),
           });
+        } else {
+          skipped.push(file.name);
         }
       }
     }
-
-    // Reset the input so the same file can be selected again after removal
-    event.target.value = '';
-
+    if (skipped.length > 0) ToastService.warning(`Skipped (duplicate or not allowed): ${skipped.join(", ")}`);
     if (tempFile.length > 0) {
       this.uploadToLibrary(tempFile).catch(err => console.error(err));
     }
@@ -241,6 +273,140 @@ export default class ReusableComponents extends React.Component<IReusableCompone
     });
     if (uploaded.length > 0) ToastService.success(`${uploaded.length} file(s) uploaded`);
     if (failed.length > 0) ToastService.error(`Upload failed: ${failed.join(", ")}`);
+  }
+  // ---- Single drag & drop document ----
+  // Upload the dropped/browsed file to the ReusableUpload library (replaces any previous single document)
+  private onSingleFileSelected = async (file: File): Promise<void> => {
+    const fileExtension = (file.name.split('.').pop() || '').toLowerCase();
+    const blocked = ['zip', 'mp3', 'wav', 'ogg', 'aac', 'mp4', 'avi', 'mkv', 'mov'];
+    if (blocked.indexOf(fileExtension) !== -1) {
+      ToastService.error("ZIP, audio and video files are not allowed");
+      return;
+    }
+    // Same file name would overwrite the library file already used by the grid
+    if (this.state.fileUploaded.some(f => f.DocumentName === file.name) || this.isNameInGrid(file.name)) {
+      ToastService.error(`${file.name} is already uploaded`);
+      return;
+    }
+    this.setState({ modaloverlay: { isOpen: true, modalText: "Uploading..." } });
+    try {
+      const previous = this.state.singleFile;
+      if (previous?.FileLink && previous.DocumentName !== file.name) {
+        await this.service.deleteFromReusableLibrary(previous.FileLink);
+      }
+      const res = await this.service.uploadToReusableLibrary(file);
+      this.setState({
+        singleFile: {
+          SlNo: 1,
+          file,
+          DocumentName: file.name,
+          DocumentType: fileExtension,
+          FileName: file.name,
+          UploadedBy: this.state.currentUser.title,
+          UploadedOn: new Date().toLocaleDateString(),
+          DocumentID: String(res.itemId),
+          FileLink: res.serverRelativeUrl
+        }
+      });
+      ToastService.success(`${file.name} uploaded`);
+    } catch (err) {
+      console.error(`Upload failed for ${file.name}`, err);
+      ToastService.error(`Upload failed: ${file.name}`);
+    } finally {
+      this.setState({ modaloverlay: { isOpen: false, modalText: "" } });
+    }
+  }
+  // Delete the single document from the ReusableUpload library
+  private onSingleFileDelete = async (file: IUploadedFile): Promise<void> => {
+    this.setState({ modaloverlay: { isOpen: true, modalText: "Deleting..." } });
+    try {
+      if (file.FileLink) await this.service.deleteFromReusableLibrary(file.FileLink);
+      this.setState({ singleFile: undefined });
+      ToastService.success(`${file.DocumentName} deleted`);
+    } catch (err) {
+      console.error(err);
+      ToastService.error(`Could not delete ${file.DocumentName}`);
+    } finally {
+      this.setState({ modaloverlay: { isOpen: false, modalText: "" } });
+    }
+  }
+  // ---- Upload grid (GridDragDropFile, one document per row) ----
+  // True if a grid row (other than excludeRowId) already holds a file with this name
+  private isNameInGrid = (name: string, excludeRowId?: number): boolean => {
+    return this.state.gridRows.some(r => r.RowId !== excludeRowId && r.file?.DocumentName === name);
+  }
+  private updateGridRow = (rowId: number, file?: IUploadedFile): void => {
+    this.setState(prev => ({ gridRows: prev.gridRows.map(r => r.RowId === rowId ? { ...r, file } : r) }));
+  }
+  private onGridAddRow = (): void => {
+    this.setState(prev => ({ gridRows: [...prev.gridRows, { RowId: this.nextGridRowId++ }] }));
+  }
+  // Upload the row's file to the ReusableUpload library (replaces the row's previous file)
+  private onGridFileSelected = async (rowId: number, file: File): Promise<void> => {
+    const fileExtension = (file.name.split('.').pop() || '').toLowerCase();
+    const blocked = ['zip', 'mp3', 'wav', 'ogg', 'aac', 'mp4', 'avi', 'mkv', 'mov'];
+    if (blocked.indexOf(fileExtension) !== -1) {
+      ToastService.error("ZIP, audio and video files are not allowed");
+      return;
+    }
+    // Same file name would overwrite a library file already used elsewhere in the form
+    if (this.state.fileUploaded.some(f => f.DocumentName === file.name) ||
+      this.state.singleFile?.DocumentName === file.name || this.isNameInGrid(file.name, rowId)) {
+      ToastService.error(`${file.name} is already uploaded`);
+      return;
+    }
+    this.setState({ modaloverlay: { isOpen: true, modalText: "Uploading..." } });
+    try {
+      const previous = this.state.gridRows.find(r => r.RowId === rowId)?.file;
+      if (previous?.FileLink && previous.DocumentName !== file.name) {
+        await this.service.deleteFromReusableLibrary(previous.FileLink);
+      }
+      const res = await this.service.uploadToReusableLibrary(file);
+      this.updateGridRow(rowId, {
+        SlNo: 0,
+        file,
+        DocumentName: file.name,
+        DocumentType: fileExtension,
+        FileName: file.name,
+        UploadedBy: this.state.currentUser.title,
+        UploadedOn: new Date().toLocaleDateString(),
+        DocumentID: String(res.itemId),
+        FileLink: res.serverRelativeUrl
+      });
+      ToastService.success(`${file.name} uploaded`);
+    } catch (err) {
+      console.error(`Upload failed for ${file.name}`, err);
+      ToastService.error(`Upload failed: ${file.name}`);
+    } finally {
+      this.setState({ modaloverlay: { isOpen: false, modalText: "" } });
+    }
+  }
+  // Delete the row's document from the library; removeRow also drops the row itself
+  private onGridDelete = async (rowId: number, removeRow: boolean): Promise<void> => {
+    const row = this.state.gridRows.find(r => r.RowId === rowId);
+    if (!row) return;
+    if (row.file?.FileLink) {
+      this.setState({ modaloverlay: { isOpen: true, modalText: "Deleting..." } });
+      try {
+        await this.service.deleteFromReusableLibrary(row.file.FileLink);
+        ToastService.success(`${row.file.DocumentName} deleted`);
+      } catch (err) {
+        console.error(err);
+        ToastService.error(`Could not delete ${row.file.DocumentName}`);
+        return;
+      } finally {
+        this.setState({ modaloverlay: { isOpen: false, modalText: "" } });
+      }
+    }
+    if (removeRow) {
+      this.setState(prev => {
+        const gridRows = prev.gridRows.filter(r => r.RowId !== rowId);
+        // Always keep at least one empty row to upload into
+        return { gridRows: gridRows.length > 0 ? gridRows : [{ RowId: this.nextGridRowId++ }] };
+      });
+    } else {
+      this.updateGridRow(rowId, undefined);
+    }
   }
   // Open an uploaded document in a new tab
   private onDocumentOpen = (fileLink?: string): void => {
@@ -275,7 +441,7 @@ export default class ReusableComponents extends React.Component<IReusableCompone
             <div className={styles.formtitle}>{this.props.wpproperties.WebpartTitle}</div>
           </div>
           <div className={styles.formbody}>
-            {this.props.wpproperties.divstyle&&(<div>
+            {this.props.wpproperties.divstyle && (<div>
             {/* One Column */}
             <div className={styles.row}>
               <div className={styles.col12}>
@@ -378,12 +544,39 @@ export default class ReusableComponents extends React.Component<IReusableCompone
               </div>
             </div>
             {/* Upload File */}
-            <div className={styles.row}>
-              <div className={styles.col12}>
-                <CustomFileInput onChange={this.uploadFile} />
+            {this.props.wpproperties.uploadfiles && (
+              <div className={styles.row}>
+                <div className={styles.col12}>
+                  <CustomFileInput onChange={this.uploadFile} />
+                </div>
               </div>
-            </div>
+            )}
+            {/* Single document (drag & drop) */}
+            {this.props.wpproperties.singledragdropfile && (
+              <div className={styles.row}>
+                <div className={styles.col12}>
+                  <SingleDragDropFile
+                    context={this.props.context}
+                    label="Single Document"
+                    uploadedFile={this.state.singleFile}
+                  onFileSelected={(file) => { this.onSingleFileSelected(file).catch(err => console.error(err)); }}
+                  onView={(file) => this.onDocumentOpen(file.FileLink)}
+                  onDelete={(file) => { this.onSingleFileDelete(file).catch(err => console.error(err)); }}
+                />
+              </div>
+            </div>)}
+            {/* Multiple documents (drag & drop) - added to the table below */}
+            {this.props.wpproperties.multidragdropfiles && (
+              <div className={styles.row}>
+                <div className={styles.col12}>
+                  <DragDropFile
+                    context={this.props.context}
+                    returnFileData={(files, selectionType) => { this.onDragDropFiles(files, selectionType).catch(err => console.error(err)); }}
+                  />
+              </div>
+            </div>)}
             {/* table */}
+            {!this.props.wpproperties.griddragdropfile && (<div>
             {this.state.fileUploaded.length > 0 &&
               <div className={styles.doctable}>
                 <table className={styles.table} >
@@ -411,6 +604,43 @@ export default class ReusableComponents extends React.Component<IReusableCompone
                 </table>
               </div>
             }
+            </div>)}
+            {/* Upload grid (GridDragDropFile in each row) */}
+            {this.props.wpproperties.griddragdropfile && (
+              <div className={styles.doctable}>
+                <table className={styles.table}>
+                  <tr className={styles.tr}>
+                    <th className={styles.th}>Sl No</th>
+                    <th className={styles.th}>Document</th>
+                    <th className={styles.th}>Document Type</th>
+                  <th className={styles.th}>Uploaded By</th>
+                  <th className={styles.th}>Uploaded On</th>
+                  <th className={styles.th}>Action</th>
+                </tr>
+                {this.state.gridRows.map((row: IGridDocumentRow, index: number) => (
+                  <tr key={row.RowId} className={styles.tr}>
+                    <td className={styles.th}>{index + 1}</td>
+                    <td className={styles.th}>
+                      {row.file
+                        ? <Link onClick={() => this.onDocumentOpen(row.file?.FileLink)} underline>{row.file.DocumentName}</Link>
+                        : <GridDragDropFile
+                          context={this.props.context}
+                          returnFileData={(file) => { this.onGridFileSelected(row.RowId, file).catch(err => console.error(err)); }}
+                        />}
+                    </td>
+                    <td className={styles.th}>{row.file?.DocumentType}</td>
+                    <td className={styles.th}>{row.file?.UploadedBy}</td>
+                    <td className={styles.th}>{row.file?.UploadedOn}</td>
+                    <td className={styles.th}>
+                      {row.file && <IconButton iconProps={{ iconName: 'View' }} title="View" ariaLabel="View" onClick={() => this.onDocumentOpen(row.file?.FileLink)} />}
+                      {row.file && <IconButton iconProps={{ iconName: 'Delete' }} title="Delete document" ariaLabel="Delete document" onClick={() => { this.onGridDelete(row.RowId, false).catch(err => console.error(err)); }} />}
+                      <IconButton iconProps={{ iconName: 'Cancel' }} title="Remove row" ariaLabel="Remove row" onClick={() => { this.onGridDelete(row.RowId, true).catch(err => console.error(err)); }} />
+                    </td>
+                  </tr>
+                ))}
+              </table>
+              <PrimaryButton className={styles.btn} iconProps={{ iconName: 'Add' }} onClick={this.onGridAddRow}>Add Row</PrimaryButton>
+            </div>)}
             <div className={styles.row}>
               <div className={styles.col12}>
                 <div className={styles.rgtalign}>

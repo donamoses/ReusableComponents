@@ -8,6 +8,10 @@ export interface IReusableComponentsProps {
 export interface IReusableComponentsWebPartProps {
   WebpartTitle: string;
   divstyle: boolean;
+  uploadfiles: boolean;
+  multidragdropfiles: boolean;
+  singledragdropfile: boolean;
+  griddragdropfile: boolean;
 }
 export interface IReusableComponentsState {
   currentUser: {
@@ -20,6 +24,10 @@ export interface IReusableComponentsState {
     modalText: string;
   };
   fileUploaded: IUploadedFile[];
+  // Single document uploaded through the drag & drop control
+  singleFile?: IUploadedFile;
+  // Rows of the upload grid (one document per row, via GridDragDropFile)
+  gridRows: IGridDocumentRow[];
   departmentOptions: IDropdownOption[];
   selectedDepartment?: string;
   title: string;
@@ -41,4 +49,9 @@ export interface IUploadedFile {
   FileName?: string;
   DocumentID?: string;
   FileLink?: string;
+}
+export interface IGridDocumentRow {
+  // Stable key for React (row index changes when rows are removed)
+  RowId: number;
+  file?: IUploadedFile;
 }

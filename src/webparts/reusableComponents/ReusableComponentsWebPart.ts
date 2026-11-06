@@ -4,8 +4,8 @@ import { Version } from '@microsoft/sp-core-library';
 import {
   type IPropertyPaneConfiguration,
   PropertyPaneTextField,
-  PropertyPaneToggle
-} from '@microsoft/sp-property-pane';
+  PropertyPaneToggle,
+ } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
 
@@ -117,9 +117,29 @@ export default class ReusableComponentsWebPart extends BaseClientSideWebPart<IRe
                   label: strings.DivStyle,
                   onText: strings.DivStyleOn,
                   offText: strings.DivStyleOff
+                }),
+                PropertyPaneToggle('uploadfiles', {
+                  label: strings.UploadFiles,
+                  onText: strings.UploadFilesOn,
+                  offText: strings.UploadFilesOff
+                }),
+                PropertyPaneToggle('multidragdropfiles', {
+                  label: strings.MultiDragDropFiles,
+                  onText: strings.MultiDragDropFilesOn,
+                  offText: strings.MultiDragDropFilesOff
+                }),
+                PropertyPaneToggle('singledragdropfile', {
+                  label: strings.SingleDragDropFile,
+                  onText: strings.SingleDragDropFileOn,
+                  offText: strings.SingleDragDropFileOff
+                }),
+                PropertyPaneToggle('griddragdropfile', {
+                  label: strings.GridDragDropFile,
+                  onText: strings.GridDragDropFileOn,
+                  offText: strings.GridDragDropFileOff
                 })
 
-                
+
               ]
             }
           ]

@@ -13,7 +13,19 @@ define([], function() {
     "AppOutlookEnvironment": "The app is running in Outlook",
     "UnknownEnvironment": "The app is running in an unknown environment",
     "DivStyle": "Enable Div Style",
-    "DivStyleOn": "On",
-    "DivStyleOff": "Off"
+    "DragFileSelection": "Drag",
+    "BrowseFileSelection": "Browse",
+    "UploadFile": "Enable Upload Files",
+    "UploadFilesOn": "Enable Upload Files",
+    "UploadFilesOff": "Disable Upload Files",
+    "MultiDragDropFiles": "Enable Multi Drag & Drop Files",
+    "MultiDragDropFilesOn": "Enable Multi Drag & Drop Files",
+    "MultiDragDropFilesOff": "Disable Multi Drag & Drop Files",
+    "SingleDragDropFile": "Enable Single Drag & Drop File",
+    "SingleDragDropFileOn": "Enable Single Drag & Drop File",
+    "SingleDragDropFileOff": "Disable Single Drag & Drop File",
+    "GridDragDropFile": "Enable Grid Drag & Drop File",
+    "GridDragDropFileOn": "Enable Grid Drag & Drop File",
+    "GridDragDropFileOff": "Disable Grid Drag & Drop File",
   }
 });
